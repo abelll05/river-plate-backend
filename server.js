@@ -47,8 +47,7 @@ const UserSchema = new mongoose.Schema({
 });
 
 const User = mongoose.model('User', UserSchema);
-const authRoutes = require('./routes/authRoutes');
-app.use('/api', authRoutes);
+
 
 // Middleware de autenticación
 const authMiddleware = (req, res, next) => {
