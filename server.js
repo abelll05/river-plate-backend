@@ -4,6 +4,7 @@ const mongoose = require('mongoose');
 const bcrypt = require('bcrypt'); // Cambiado de "bcrypt" a "bcrypt"
 const jwt = require('jsonwebtoken');
 const cors = require('cors');
+const authRoutes = require('./routes/authRoutes');
 
 // Configuración inicial
 const app = express();
@@ -34,19 +35,7 @@ mongoose
     process.exit(1);
   });
 
-// Modelo de usuario
-const UserSchema = new mongoose.Schema({
-  username: { type: String, required: true, unique: true },
-  email: {
-    type: String,
-    required: true,
-    unique: true,
-    match: /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/,
-  },
-  password: { type: String, required: true, minlength: 6 },
-});
-
-const User = mongoose.model('User', UserSchema);
+  app.use('/api', authRoutes);
 
 
 // Middleware de autenticación
