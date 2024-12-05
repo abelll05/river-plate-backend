@@ -1,7 +1,7 @@
 const express = require('express');
-const bcrypt = require('bcrypt'); // Cambiado de "bcrypt" a "bcrypt"
+const bcrypt = require('bcrypt'); // Biblioteca para encriptar contraseñas
 const jwt = require('jsonwebtoken');
-const User = require('../models/User');
+const User = require('../models/User'); // Modelo de usuario
 const router = express.Router();
 
 // Ruta de registro
@@ -14,16 +14,13 @@ router.post('/register', async (req, res) => {
   }
 
   try {
-    // Verificar si ya existe un usuario con el mismo correo
-    const existingEmail = await User.findOne({ email });
-    if (existingEmail) {
-      return res.status(400).json({ error: 'El correo ya está registrado.' });
-    }
-
-    // Verificar si ya existe un usuario con el mismo username
-    const existingUsername = await User.findOne({ username });
-    if (existingUsername) {
-      return res.status(400).json({ error: 'El nombre de usuario ya está registrado.' });
+    // Verificar si ya existe un usuario con el mismo correo o username
+    const existingUser = await User.findOne({
+      $or: [{ email }, { username }],
+    });
+    if (existingUser) {
+      const duplicatedField = existingUser.email === email ? 'correo' : 'nombre de usuario';
+      return res.status(400).json({ error: `El ${duplicatedField} ya está registrado.` });
     }
 
     // Encriptar la contraseña
@@ -41,21 +38,9 @@ router.post('/register', async (req, res) => {
     // Generar un token JWT
     const token = jwt.sign({ id: newUser._id }, process.env.JWT_SECRET, { expiresIn: '1h' });
 
-    // Enviar el token como respuesta
     res.status(201).json({ message: 'Usuario registrado con éxito.', token });
   } catch (error) {
     console.error('Error en /register:', error.message);
-
-    // Manejar errores específicos de MongoDB, como duplicados
-    if (error.code === 11000) {
-      const duplicatedField = Object.keys(error.keyPattern)[0];
-      const errorMessage =
-        duplicatedField === 'email'
-          ? 'El correo ya está registrado.'
-          : 'El nombre de usuario ya está registrado.';
-      return res.status(400).json({ error: errorMessage });
-    }
-
     res.status(500).json({ error: 'Error en el servidor, por favor intente más tarde.' });
   }
 });
@@ -70,11 +55,13 @@ router.post('/login', async (req, res) => {
   }
 
   try {
+    // Buscar usuario por email
     const user = await User.findOne({ email });
     if (!user) {
       return res.status(400).json({ error: 'Correo o contraseña incorrectos.' });
     }
 
+    // Verificar la contraseña
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
       return res.status(400).json({ error: 'Correo o contraseña incorrectos.' });
@@ -90,4 +77,5 @@ router.post('/login', async (req, res) => {
   }
 });
 
+// Exportar el router
 module.exports = router;
