@@ -1,7 +1,7 @@
 require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
-const bcrypt = require('bcrypt'); // Cambiado de "bcrypts" a "bcrypt"
+const bcrypt = require('bcrypt'); // Cambiado de "bcrypt" a "bcrypt"
 const jwt = require('jsonwebtoken');
 const cors = require('cors');
 
@@ -63,7 +63,7 @@ const authMiddleware = (req, res, next) => {
 };
 
 // Rutas
-app.get('/api/test', (req, res) => {
+app.get('/', (req, res) => {
   res.send('Servidor funcionando correctamente');
 });
 
