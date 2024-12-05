@@ -1,5 +1,5 @@
 const express = require('express');
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcrypt'); // Cambiado de "bcrypt" a "bcrypt"
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 const router = express.Router();
@@ -42,7 +42,7 @@ router.post('/register', async (req, res) => {
     const token = jwt.sign({ id: newUser._id }, process.env.JWT_SECRET, { expiresIn: '1h' });
 
     // Enviar el token como respuesta
-    res.status(201).json({ token });
+    res.status(201).json({ message: 'Usuario registrado con éxito.', token });
   } catch (error) {
     console.error('Error en /register:', error.message);
 
@@ -83,7 +83,7 @@ router.post('/login', async (req, res) => {
     // Generar un token JWT
     const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '1h' });
 
-    res.status(200).json({ token });
+    res.status(200).json({ message: 'Inicio de sesión exitoso.', token });
   } catch (error) {
     console.error('Error en /login:', error.message);
     res.status(500).json({ error: 'Error en el servidor, por favor intente más tarde.' });

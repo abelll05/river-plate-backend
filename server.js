@@ -1,7 +1,7 @@
 require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
-const bcrypt = require('bcrypts');
+const bcrypt = require('bcrypt'); // Cambiado de "bcrypts" a "bcrypt"
 const jwt = require('jsonwebtoken');
 const cors = require('cors');
 
@@ -13,14 +13,13 @@ const PORT = process.env.PORT || 5000;
 app.use(express.json());
 
 // Configuración de CORS
-const allowedOrigins = [ // Agrega aquí el dominio del frontend
+const allowedOrigins = [
   'http://localhost:3000', // Desarrollo local
-  'https://nombre-del-frontend.onrender.com' // Dominio del frontend desplegado
+  'https://nombre-del-frontend.onrender.com', // Dominio del frontend desplegado
 ];
-
 app.use(cors({
   origin: allowedOrigins,
-  credentials: true
+  credentials: true,
 }));
 
 // Conexión a MongoDB
