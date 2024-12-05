@@ -41,7 +41,7 @@ mongoose
     process.exit(1);
   });
 
-  app.use('/api', authRoutes);
+app.use('/api', authRoutes);
 
 
 // Middleware de autenticación
