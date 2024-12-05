@@ -15,7 +15,7 @@ app.use(express.json());
 // Configuración de CORS
 const allowedOrigins = [
   'http://localhost:3000', // Desarrollo local
-  'https://nombre-del-frontend.onrender.com', // Dominio del frontend desplegado
+  'https://river-plate-frontend.onrender.com', // Dominio del frontend desplegado
 ];
 app.use(cors({
   origin: allowedOrigins,
