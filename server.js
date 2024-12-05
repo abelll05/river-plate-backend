@@ -10,6 +10,12 @@ const authRoutes = require('./routes/authRoutes');
 const app = express();
 const PORT = process.env.PORT || 5000;
 
+// Middleware para registrar solicitudes entrantes
+app.use((req, res, next) => {
+  console.log(`Solicitud recibida: ${req.method} ${req.url}`);
+  next(); // Pasa el control al siguiente middleware o ruta
+});
+
 // Middlewares
 app.use(express.json());
 
