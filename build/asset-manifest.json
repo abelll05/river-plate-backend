@@ -1,0 +1,25 @@
+{
+  "files": {
+    "main.css": "./static/css/main.47cbd9e6.css",
+    "main.js": "./static/js/main.7085e7bd.js",
+    "static/js/453.8ab44547.chunk.js": "./static/js/453.8ab44547.chunk.js",
+    "static/media/madrid.jpg": "./static/media/madrid.018b3aeadd99ae4266f1.jpg",
+    "static/media/imagen2.jpg": "./static/media/imagen2.f64316419c88d9b774f7.jpg",
+    "static/media/imagen3.jpg": "./static/media/imagen3.66b0d614eb9ae8ff1487.jpg",
+    "static/media/imagen1.jpg": "./static/media/imagen1.6103d99c50e35bf814a2.jpg",
+    "static/media/instagram.jpg": "./static/media/instagram.4ba3fbf1cd96e698302f.jpg",
+    "static/media/twitter.jpg": "./static/media/twitter.d389f8bf73dfa9dd3f86.jpg",
+    "static/media/facebook.jpg": "./static/media/facebook.b35c0f4e5ee768925011.jpg",
+    "static/media/youtube.jpg": "./static/media/youtube.e4d85e50a6524267414c.jpg",
+    "static/media/linkedin.jpg": "./static/media/linkedin.26d0d4dd8d6f8d73f1f0.jpg",
+    "static/media/tiktok.jpg": "./static/media/tiktok.a746f58d272aa225f2f1.jpg",
+    "index.html": "./index.html",
+    "main.47cbd9e6.css.map": "./static/css/main.47cbd9e6.css.map",
+    "main.7085e7bd.js.map": "./static/js/main.7085e7bd.js.map",
+    "453.8ab44547.chunk.js.map": "./static/js/453.8ab44547.chunk.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.47cbd9e6.css",
+    "static/js/main.7085e7bd.js"
+  ]
+}
