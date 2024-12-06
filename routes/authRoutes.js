@@ -2,9 +2,8 @@ const express = require('express');
 const router = express.Router();
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
-const User = require('../models/User'); // Modelo de usuario
+const User = require('../models/User'); 
 
-// Registro de usuario
 router.post('/register', async (req, res) => {
   const { username, email, password } = req.body;
 
@@ -35,7 +34,6 @@ router.post('/register', async (req, res) => {
   }
 });
 
-// Inicio de sesión
 router.post('/login', async (req, res) => {
   const { email, password } = req.body;
 

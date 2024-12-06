@@ -2,6 +2,7 @@ require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
+const path = require('path'); // Importante para servir archivos estáticos
 const authRoutes = require('./routes/authRoutes');
 
 const app = express();
@@ -13,6 +14,7 @@ app.use((req, res, next) => {
   next();
 });
 
+// Middleware para analizar el cuerpo de las solicitudes en JSON
 app.use(express.json());
 
 // Configuración de CORS
@@ -39,13 +41,24 @@ mongoose
     process.exit(1);
   });
 
-// Prefijo para las rutas de autenticación
+// Rutas de autenticación
 app.use('/api', authRoutes);
 
-app.get('/', (req, res) => {
+// Sirve los archivos estáticos del frontend (React)
+app.use(express.static(path.join(__dirname, 'build')));
+
+// Ruta para verificar que el servidor está funcionando
+app.get('/health', (req, res) => {
   res.send('Servidor funcionando correctamente');
 });
 
+// Manejo de rutas del frontend (React)
+// Cualquier ruta que no sea API devuelve el index.html
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, 'build', 'index.html'));
+});
+
+// Inicia el servidor
 app.listen(PORT, () => {
   console.log(`Servidor escuchando en el puerto ${PORT}`);
 });

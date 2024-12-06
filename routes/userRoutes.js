@@ -1,9 +1,8 @@
 const express = require('express');
 const jwt = require('jsonwebtoken');
-const User = require('../models/User'); // Asegúrate de que el modelo está correctamente definido
+const User = require('../models/User'); 
 const router = express.Router();
 
-// Middleware para verificar token
 const authenticateToken = (req, res, next) => {
   const token = req.header('Authorization')?.split(' ')[1];
   if (!token) return res.status(401).json({ error: 'Acceso denegado. Token no proporcionado.' });
@@ -17,10 +16,9 @@ const authenticateToken = (req, res, next) => {
   }
 };
 
-// Obtener perfil del usuario actual
 router.get('/profile', authenticateToken, async (req, res) => {
   try {
-    const user = await User.findById(req.user.id).select('-password'); // Excluye la contraseña
+    const user = await User.findById(req.user.id).select('-password'); 
     if (!user) {
       return res.status(404).json({ error: 'Usuario no encontrado.' });
     }
@@ -31,7 +29,6 @@ router.get('/profile', authenticateToken, async (req, res) => {
   }
 });
 
-// Actualizar datos del usuario
 router.put('/profile', authenticateToken, async (req, res) => {
   const { username, email } = req.body;
   try {
@@ -50,7 +47,6 @@ router.put('/profile', authenticateToken, async (req, res) => {
   }
 });
 
-// Eliminar cuenta del usuario
 router.delete('/profile', authenticateToken, async (req, res) => {
   try {
     const deletedUser = await User.findByIdAndDelete(req.user.id);
