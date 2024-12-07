@@ -35,13 +35,14 @@ mongoose
     process.exit(1);
   });
 
-// Rutas de la API
+// Rutas de la API (si tienes rutas de autenticación o API, configúralas aquí)
 app.use('/api', authRoutes);
 
 // Middleware para servir archivos estáticos del frontend
 app.use(express.static(path.join(__dirname, 'build')));
 
-// Cualquier ruta que no sea de la API devuelve el archivo index.html
+// Esta ruta maneja todas las rutas de React y siempre devuelve index.html
+// Esto es necesario para las SPA que usan React Router
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'build', 'index.html'));
 });
