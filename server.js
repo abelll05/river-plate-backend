@@ -8,13 +8,11 @@ const authRoutes = require('./routes/authRoutes');
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// Middleware para solicitudes JSON
 app.use(express.json());
 
-// Configuración de CORS
 const allowedOrigins = [
-  'http://localhost:3000', // Desarrollo local
-  'https://river-plate-frontend.onrender.com', // Despliegue en Render del frontend
+  'http://localhost:3000', 
+  'https://river-plate-frontend.onrender.com', 
 ];
 app.use(
   cors({
@@ -23,7 +21,6 @@ app.use(
   })
 );
 
-// Conexión a MongoDB
 mongoose
   .connect(process.env.MONGO_URI, {
     useNewUrlParser: true,
@@ -35,19 +32,18 @@ mongoose
     process.exit(1);
   });
 
-// Rutas de la API (si tienes rutas de autenticación o API, configúralas aquí)
+
 app.use('/api', authRoutes);
 
-// Middleware para servir archivos estáticos del frontend
+
 app.use(express.static(path.join(__dirname, 'build')));
 
-// Esta ruta maneja todas las rutas de React y siempre devuelve index.html
-// Esto es necesario para las SPA que usan React Router
+
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'build', 'index.html'));
 });
 
-// Iniciar el servidor
+
 app.listen(PORT, () => {
   console.log(`Servidor escuchando en el puerto ${PORT}`);
 });
