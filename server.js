@@ -41,7 +41,7 @@ app.use('/api', authRoutes);
 // Middleware para servir archivos estáticos del frontend
 app.use(express.static(path.join(__dirname, 'build')));
 
-// Cualquier ruta que no sea API devuelve index.html
+// Cualquier ruta que no sea de la API devuelve el archivo index.html
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'build', 'index.html'));
 });
