@@ -31,7 +31,7 @@ mongoose
   .then(() => console.log('Conexión a MongoDB exitosa'))
   .catch((err) => {
     console.error('Error al conectar a MongoDB:', err);
-    process.exit(1); // Termina el proceso si la conexión falla
+    process.exit(1);
   });
 
 // Rutas de autenticación
@@ -40,7 +40,7 @@ app.use('/api', authRoutes);
 // Servir archivos estáticos (si usas React, por ejemplo, para producción)
 app.use(express.static(path.join(__dirname, 'build')));
 
-// Ruta comodín para manejar todas las rutas no encontradas (por ejemplo, en producción)
+// Ruta comodín para manejar todas las rutas no encontradas
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'build', 'index.html'));
 });
