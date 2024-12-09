@@ -1,10 +1,9 @@
 const transporter = require("../utils/emailService");
 
-// Función para enviar correo de confirmación
 const enviarCorreoConfirmacion = async (email, nombre) => {
   const mensaje = {
-    from: process.env.EMAIL_USER, // Tu correo
-    to: email, // Correo del destinatario
+    from: process.env.EMAIL_USER, 
+    to: email, 
     subject: "Confirmación de Registro - River Plate",
     html: `
       <h1>¡Hola, ${nombre}!</h1>

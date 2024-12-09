@@ -2,7 +2,7 @@ const express = require('express');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
-const sendMail = require('../utils/mailer'); // Si necesitas enviar correos
+const sendMail = require('../utils/mailer');
 const router = express.Router();
 
 router.post('/register', async (req, res) => {
