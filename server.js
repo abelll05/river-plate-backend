@@ -8,9 +8,8 @@ const authRoutes = require('./routes/authRoutes');
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-app.use(express.json()); // Para poder recibir datos JSON en las peticiones
+app.use(express.json());
 
-// Configuración de CORS
 const allowedOrigins = [
   'http://localhost:3000', 
   'https://river-plate-frontend.onrender.com', 
@@ -22,7 +21,6 @@ app.use(
   })
 );
 
-// Conexión a MongoDB
 mongoose
   .connect(process.env.MONGO_URI, {
     useNewUrlParser: true,
@@ -31,21 +29,21 @@ mongoose
   .then(() => console.log('Conexión a MongoDB exitosa'))
   .catch((err) => {
     console.error('Error al conectar a MongoDB:', err);
-    process.exit(1); // Termina el proceso si la conexión falla
+    process.exit(1);
   });
 
-// Rutas de autenticación
+
 app.use('/api', authRoutes);
 
-// Servir archivos estáticos (si usas React, por ejemplo, para producción)
+
 app.use(express.static(path.join(__dirname, 'build')));
 
-// Ruta comodín para manejar todas las rutas no encontradas (por ejemplo, en producción)
+
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'build', 'index.html'));
 });
 
-// Escuchar en el puerto configurado
+
 app.listen(PORT, () => {
   console.log(`Servidor escuchando en el puerto ${PORT}`);
 });
