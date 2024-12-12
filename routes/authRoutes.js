@@ -29,30 +29,15 @@ router.post('/register', async (req, res) => {
     // Guardar el usuario en la base de datos
     const savedUser = await newUser.save();
 
-    // Crear un token de verificación (usando JWT)
+    // Crear un token de verificación
     const verificationToken = jwt.sign(
       { userId: savedUser._id },
-      process.env.JWT_SECRET, // Asegúrate de definir esta variable en tu .env
+      process.env.JWT_SECRET, // Define esta variable en tu .env
       { expiresIn: '1h' } // El token expirará en una hora
     );
 
-    // URL para la verificación
-    const verificationUrl = `http://localhost:5000/api/verify/${verificationToken}`;
-
-    // Asunto y cuerpo del correo de confirmación
-    const emailSubject = 'Confirmación de Registro - River Plate';
-    const emailText = `
-      <h1>¡Hola, ${username}!</h1>
-      <p>Gracias por registrarte en nuestra plataforma River Plate.</p>
-      <p>Para completar tu registro, por favor haz clic en el siguiente enlace para verificar tu correo:</p>
-      <p><a href="${verificationUrl}">Verificar correo</a></p>
-      <p>Una vez verificado tu correo, podrás iniciar sesión en nuestra plataforma.</p>
-      <hr>
-      <p>River Plate © 2024. Todos los derechos reservados.</p>
-    `;
-
     // Enviar el correo con el enlace de verificación
-    await sendMail(email, emailSubject, emailText);
+    await sendMail.enviarCorreoConfirmacion(email, username, verificationToken);
 
     // Responder con un mensaje de éxito
     res.status(200).json({ message: 'Usuario registrado correctamente. Se ha enviado un correo de confirmación.' });
@@ -79,11 +64,10 @@ router.get('/verify/:token', async (req, res) => {
 
     // Marcar como verificado
     user.verified = true;
-    user.verificationToken = undefined; // Limpiar el token de verificación
     await user.save();
 
-    // Redirigir al login
-    res.redirect('http://localhost:3000/login'); // URL de tu frontend
+    // Redirigir al login en producción
+    res.redirect('https://river-plate-frontend.onrender.com/login'); // URL de login en producción
   } catch (error) {
     console.error('Error al verificar el correo:', error);
     res.status(400).json({ error: 'Token de verificación inválido o expirado' });
