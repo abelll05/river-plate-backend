@@ -38,8 +38,10 @@ router.post('/register', async (req, res) => {
     });
     await newUser.save();
 
-    // Enviar correo de verificación
-    const verificationUrl = `http://localhost:3000/verify/${verificationToken}`; // Enlace para desarrollo (local)
+    // Usar la variable de entorno FRONTEND_URL para obtener la URL correcta
+    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000'; // Valor por defecto para desarrollo
+    const verificationUrl = `${frontendUrl}/verify/${verificationToken}`;
+
     const subject = 'Verifica tu correo electrónico';
     const text = `
       Hola ${username},
@@ -105,7 +107,8 @@ router.get('/verify/:token', async (req, res) => {
     await user.save();
 
     // Redirigir a la URL del frontend después de verificar (producción)
-    res.redirect('https://river-plate-frontend.onrender.com/login'); // Redirige a la página de login en producción
+    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000'; // Valor por defecto para desarrollo
+    res.redirect(`${frontendUrl}/login`); // Redirige a la página de login en producción
 
   } catch (error) {
     console.error('Error en /verify:', error.message);
