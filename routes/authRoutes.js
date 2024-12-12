@@ -106,13 +106,9 @@ router.get('/verify/:token', async (req, res) => {
     user.verificationToken = null; // Limpiar el token de verificación
     await user.save();
 
-    // Verifica que el usuario se actualizó correctamente
-    console.log('Usuario verificado:', user); // Agrega un log para verificar el estado del usuario
-
     // Redirigir al frontend para mostrar un mensaje de verificación exitosa
     const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
     res.redirect(`${frontendUrl}/verify-success`); // Redirige a una página de éxito en frontend
-
   } catch (error) {
     console.error('Error en /verify:', error.message);
     res.status(500).json({ error: 'Error en el servidor' });
