@@ -46,7 +46,7 @@ router.post('/register', async (req, res) => {
     const text = `
       Hola ${username},
       Gracias por registrarte. Por favor verifica tu correo electrónico haciendo clic en el siguiente enlace:
-      ${verificationUrl}
+      <a href="${verificationUrl}">Verificar correo</a>
     `;
     await sendMail(email, subject, text);
 
