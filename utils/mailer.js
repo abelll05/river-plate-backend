@@ -13,10 +13,10 @@ const transporter = nodemailer.createTransport({
 // Función para enviar correos
 const sendMail = async (to, subject, text) => {
   const mailOptions = {
-    from: process.env.SMTP_USER, // De: tu correo
+    from: process.env.SMTP_USER,  // De: tu correo
     to,                         // Para: correo del destinatario
     subject,                    // Asunto del correo
-    text,                       // Cuerpo del correo
+    html: text,                  // Cambié 'text' a 'html' para enviar el correo como HTML
   };
 
   // Imprimir los detalles del correo para depuración

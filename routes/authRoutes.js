@@ -44,9 +44,10 @@ router.post('/register', async (req, res) => {
 
     const subject = 'Verifica tu correo electrónico';
     const text = `
-      Hola ${username},
-      Gracias por registrarte. Por favor verifica tu correo electrónico haciendo clic en el siguiente enlace:
+      <p>Hola ${username},</p>
+      <p>Gracias por registrarte. Por favor verifica tu correo electrónico haciendo clic en el siguiente enlace:</p>
       <a href="${verificationUrl}">Verificar correo</a>
+      <p>Si no reconoces este correo, por favor ignóralo.</p>
     `;
     await sendMail(email, subject, text);
 
@@ -106,7 +107,7 @@ router.get('/verify/:token', async (req, res) => {
     user.verificationToken = null;
     await user.save();
 
-    // Redirigir a la URL del frontend después de verificar (producción)
+    // Usar la variable de entorno FRONTEND_URL para redirigir correctamente
     const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000'; // Valor por defecto para desarrollo
     res.redirect(`${frontendUrl}/login`); // Redirige a la página de login en producción
 
