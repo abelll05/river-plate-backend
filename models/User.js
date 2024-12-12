@@ -17,6 +17,10 @@ const UserSchema = new mongoose.Schema({
     required: [true, 'La contraseña es obligatoria'],
     minlength: [6, 'La contraseña debe tener al menos 6 caracteres'],
   },
+  verified: {
+    type: Boolean,
+    default: false, // Por defecto el usuario no está verificado
+  },
 });
 
 module.exports = mongoose.model('User', UserSchema);
