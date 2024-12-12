@@ -40,7 +40,7 @@ router.post('/register', async (req, res) => {
 
     // Usar la variable de entorno FRONTEND_URL para obtener la URL correcta
     const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000'; // Valor por defecto para desarrollo
-    const verificationUrl = `${frontendUrl}/verify/${verificationToken}`;
+    const verificationUrl = `${frontendUrl}/verify-success?token=${verificationToken}`;
 
     const subject = 'Verifica tu correo electrónico';
     const text = `
