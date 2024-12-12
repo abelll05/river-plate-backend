@@ -104,12 +104,12 @@ router.get('/verify/:token', async (req, res) => {
 
     // Marcar como verificado y limpiar el token
     user.isVerified = true;
-    user.verificationToken = null;
+    user.verificationToken = null; // Limpiar el token de verificación
     await user.save();
 
-    // Usar la variable de entorno FRONTEND_URL para redirigir correctamente
-    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000'; // Valor por defecto para desarrollo
-    res.redirect(`${frontendUrl}/login`); // Redirige a la página de login en producción
+    // Redirigir a la página del frontend para que el componente Verify.js maneje la verificación
+    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
+    res.redirect(`${frontendUrl}/verify-success`); // Ruta donde se maneja la verificación exitosa
 
   } catch (error) {
     console.error('Error en /verify:', error.message);
