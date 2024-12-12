@@ -1,7 +1,7 @@
 const express = require('express');
 const bcrypt = require('bcryptjs');
 const User = require('../models/User');
-const sendMail = require('../utils/mailer');
+const { enviarCorreoConfirmacion } = require('../utils/mailer'); // Importar la función correcta
 const jwt = require('jsonwebtoken');
 const router = express.Router();
 
@@ -37,7 +37,7 @@ router.post('/register', async (req, res) => {
     );
 
     // Enviar el correo con el enlace de verificación
-    await sendMail.enviarCorreoConfirmacion(email, username, verificationToken);
+    await enviarCorreoConfirmacion(email, username, verificationToken);
 
     // Responder con un mensaje de éxito
     res.status(200).json({ message: 'Usuario registrado correctamente. Se ha enviado un correo de confirmación.' });
