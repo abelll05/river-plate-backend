@@ -1,79 +1,112 @@
 const express = require('express');
-const bcrypt = require('bcryptjs');
-const User = require('../models/User');
-const { enviarCorreoConfirmacion } = require('../utils/mailer'); // Importamos correctamente la función
+const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
+const crypto = require('crypto'); // Para generar tokens únicos
+const User = require('../models/User');
+const sendMail = require('../utils/mailer');
 const router = express.Router();
 
-// Ruta de registro
+// Ruta de registro con verificación de correo
 router.post('/register', async (req, res) => {
   const { username, email, password } = req.body;
 
+  if (!username || !email || !password) {
+    return res.status(400).json({ error: 'Todos los campos son obligatorios' });
+  }
+
   try {
-    // Verificar si el usuario ya existe
-    const existingUser = await User.findOne({ email });
-    if (existingUser) {
-      return res.status(400).json({ error: 'El correo electrónico ya está registrado' });
+    const existingEmail = await User.findOne({ email });
+    if (existingEmail) {
+      return res.status(400).json({ error: 'El correo ya está registrado' });
     }
 
-    // Crear nuevo usuario
-    const salt = await bcrypt.genSalt(10);
-    const hashedPassword = await bcrypt.hash(password, salt);
+    const existingUsername = await User.findOne({ username });
+    if (existingUsername) {
+      return res.status(400).json({ error: 'El nombre de usuario ya está registrado' });
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    // Generar token único para la verificación
+    const verificationToken = crypto.randomBytes(32).toString('hex');
+
     const newUser = new User({
       username,
       email,
       password: hashedPassword,
-      verified: false, // Estado de verificación
+      verificationToken, // Guardar token de verificación
     });
+    await newUser.save();
 
-    // Guardar el usuario en la base de datos
-    const savedUser = await newUser.save();
+    // Enviar correo de verificación
+    const verificationUrl = `http://localhost:3000/verify/${verificationToken}`; // Cambia según tu dominio
+    const subject = 'Verifica tu correo electrónico';
+    const text = `
+      Hola ${username},
+      Gracias por registrarte. Por favor verifica tu correo electrónico haciendo clic en el siguiente enlace:
+      ${verificationUrl}
+    `;
+    await sendMail(email, subject, text);
 
-    // Crear un token de verificación (usando JWT)
-    const verificationToken = jwt.sign(
-      { userId: savedUser._id },
-      process.env.JWT_SECRET, // Asegúrate de definir esta variable en tu .env
-      { expiresIn: '1h' } // El token expirará en una hora
-    );
-
-    // URL para la verificación
-    const verificationUrl = `http://localhost:5000/api/verify/${verificationToken}`;
-
-    // Enviar el correo con el enlace de verificación
-    await enviarCorreoConfirmacion(email, username, verificationToken); // Usamos la función correctamente
-
-    // Responder con un mensaje de éxito
-    res.status(200).json({ message: 'Usuario registrado correctamente. Se ha enviado un correo de confirmación.' });
+    res.status(201).json({
+      message: 'Usuario registrado exitosamente. Por favor verifica tu correo.',
+    });
   } catch (error) {
-    console.error('Error en el registro de usuario:', error);
-    res.status(500).json({ error: 'Hubo un problema al registrar al usuario.' });
+    console.error('Error en /register:', error.message);
+    res.status(500).json({ error: 'Error en el servidor' });
   }
 });
 
-// Ruta de verificación de correo
+// Ruta de login
+router.post('/login', async (req, res) => {
+  const { email, password } = req.body;
+
+  if (!email || !password) {
+    return res.status(400).json({ error: 'Todos los campos son obligatorios' });
+  }
+
+  try {
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(404).json({ error: 'Usuario no encontrado' });
+    }
+
+    if (!user.isVerified) {
+      return res.status(403).json({ error: 'Por favor verifica tu correo antes de iniciar sesión.' });
+    }
+
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) {
+      return res.status(400).json({ error: 'Contraseña incorrecta' });
+    }
+
+    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '1h' });
+    res.status(200).json({ message: 'Login exitoso', token });
+  } catch (error) {
+    console.error('Error en /login:', error.message);
+    res.status(500).json({ error: 'Error en el servidor' });
+  }
+});
+
+// Ruta para verificar el correo electrónico
 router.get('/verify/:token', async (req, res) => {
   const { token } = req.params;
 
   try {
-    // Verificar el token
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-
-    // Buscar al usuario en la base de datos
-    const user = await User.findById(decoded.userId);
+    const user = await User.findOne({ verificationToken: token });
 
     if (!user) {
-      return res.status(400).json({ error: 'Usuario no encontrado' });
+      return res.status(400).json({ error: 'Token de verificación inválido o expirado' });
     }
 
-    // Marcar como verificado
-    user.verified = true;
+    user.isVerified = true; // Marcar como verificado
+    user.verificationToken = null; // Limpiar el token
     await user.save();
 
-    // Redirigir al login en producción
-    res.redirect('https://river-plate-frontend.onrender.com/login'); // URL de login en producción
+    res.status(200).json({ message: 'Correo verificado exitosamente. Ahora puedes iniciar sesión.' });
   } catch (error) {
-    console.error('Error al verificar el correo:', error);
-    res.status(400).json({ error: 'Token de verificación inválido o expirado' });
+    console.error('Error en /verify:', error.message);
+    res.status(500).json({ error: 'Error en el servidor' });
   }
 });
 
