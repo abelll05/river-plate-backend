@@ -1,22 +1,19 @@
-const transporter = require("../utils/emailService");
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
+const transporter = require("../utils/emailServices");
 
 // Función para enviar el correo de confirmación
-const enviarCorreoConfirmacion = async (email, nombre, verificationToken) => {
-  // URL de verificación que apunta a tu backend (en producción)
-  const verificationUrl = `https://river-plate-backend.onrender.com/api/verify/${verificationToken}`;
-
+const enviarCorreoConfirmacion = async (email, nombre, token) => {
   const mensaje = {
-    from: process.env.EMAIL_USER, 
+    from: process.env.SMTP_USER, 
     to: email, 
     subject: "Confirmación de Registro - River Plate",
     html: `
       <h1>¡Hola, ${nombre}!</h1>
-      <p>Gracias por registrarte en nuestra plataforma River Plate.</p>
-      <p>Para completar tu registro, por favor haz clic en el siguiente enlace para verificar tu correo:</p>
-      <p><a href="${verificationUrl}">Verificar correo</a></p>
-      <p>Una vez verificado tu correo, podrás iniciar sesión en nuestra plataforma.</p>
+      <p>Gracias por registrarte en nuestra plataforma de River Plate.</p>
+      <p>Por favor, verifica tu cuenta haciendo clic en el siguiente enlace:</p>
+      <a href="https://river-plate-frontend.onrender.com/verify/${token}">Verificar mi cuenta</a> <!-- Enlace para producción -->
+      <p>Disfruta de la experiencia exclusiva como hincha del Millonario.</p>
       <hr>
       <p>River Plate © 2024. Todos los derechos reservados.</p>
     `,
@@ -31,5 +28,4 @@ const enviarCorreoConfirmacion = async (email, nombre, verificationToken) => {
   }
 };
 
-// Exportar la función de envío de correo
 module.exports = { enviarCorreoConfirmacion };

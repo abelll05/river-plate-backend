@@ -39,7 +39,7 @@ router.post('/register', async (req, res) => {
     await newUser.save();
 
     // Enviar correo de verificación
-    const verificationUrl = `http://localhost:3000/verify/${verificationToken}`; // Cambia según tu dominio
+    const verificationUrl = `http://localhost:3000/verify/${verificationToken}`; // Enlace para desarrollo (local)
     const subject = 'Verifica tu correo electrónico';
     const text = `
       Hola ${username},
@@ -99,11 +99,14 @@ router.get('/verify/:token', async (req, res) => {
       return res.status(400).json({ error: 'Token de verificación inválido o expirado' });
     }
 
-    user.isVerified = true; // Marcar como verificado
-    user.verificationToken = null; // Limpiar el token
+    // Marcar como verificado y limpiar el token
+    user.isVerified = true;
+    user.verificationToken = null;
     await user.save();
 
-    res.status(200).json({ message: 'Correo verificado exitosamente. Ahora puedes iniciar sesión.' });
+    // Redirigir a la URL del frontend después de verificar (producción)
+    res.redirect('https://river-plate-frontend.onrender.com/login'); // Redirige a la página de login en producción
+
   } catch (error) {
     console.error('Error en /verify:', error.message);
     res.status(500).json({ error: 'Error en el servidor' });
