@@ -40,14 +40,13 @@ router.post('/register', async (req, res) => {
 
     // Usar la variable de entorno FRONTEND_URL para obtener la URL correcta
     const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000'; // Valor por defecto para desarrollo
-    const verificationUrl = `${frontendUrl}/verify-success?token=${verificationToken}`;
+    const verificationUrl = `${frontendUrl}/verify/${verificationToken}`;
 
     const subject = 'Verifica tu correo electrónico';
     const text = `
-      <p>Hola ${username},</p>
-      <p>Gracias por registrarte. Por favor verifica tu correo electrónico haciendo clic en el siguiente enlace:</p>
+      Hola ${username},
+      Gracias por registrarte. Por favor verifica tu correo electrónico haciendo clic en el siguiente enlace:
       <a href="${verificationUrl}">Verificar correo</a>
-      <p>Si no reconoces este correo, por favor ignóralo.</p>
     `;
     await sendMail(email, subject, text);
 
@@ -107,9 +106,12 @@ router.get('/verify/:token', async (req, res) => {
     user.verificationToken = null; // Limpiar el token de verificación
     await user.save();
 
-    // Redirigir a la página del frontend para que el componente Verify.js maneje la verificación
+    // Verifica que el usuario se actualizó correctamente
+    console.log('Usuario verificado:', user); // Agrega un log para verificar el estado del usuario
+
+    // Redirigir al frontend para mostrar un mensaje de verificación exitosa
     const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
-    res.redirect(`${frontendUrl}/verify-success`); // Ruta donde se maneja la verificación exitosa
+    res.redirect(`${frontendUrl}/verify-success`); // Redirige a una página de éxito en frontend
 
   } catch (error) {
     console.error('Error en /verify:', error.message);
