@@ -1,7 +1,7 @@
 const express = require('express');
 const bcrypt = require('bcryptjs');
 const User = require('../models/User');
-const { enviarCorreoConfirmacion } = require('../utils/mailer'); // Importar la función correcta
+const { enviarCorreoConfirmacion } = require('../utils/mailer'); // Importamos correctamente la función
 const jwt = require('jsonwebtoken');
 const router = express.Router();
 
@@ -29,15 +29,18 @@ router.post('/register', async (req, res) => {
     // Guardar el usuario en la base de datos
     const savedUser = await newUser.save();
 
-    // Crear un token de verificación
+    // Crear un token de verificación (usando JWT)
     const verificationToken = jwt.sign(
       { userId: savedUser._id },
-      process.env.JWT_SECRET, // Define esta variable en tu .env
+      process.env.JWT_SECRET, // Asegúrate de definir esta variable en tu .env
       { expiresIn: '1h' } // El token expirará en una hora
     );
 
+    // URL para la verificación
+    const verificationUrl = `http://localhost:5000/api/verify/${verificationToken}`;
+
     // Enviar el correo con el enlace de verificación
-    await enviarCorreoConfirmacion(email, username, verificationToken);
+    await enviarCorreoConfirmacion(email, username, verificationToken); // Usamos la función correctamente
 
     // Responder con un mensaje de éxito
     res.status(200).json({ message: 'Usuario registrado correctamente. Se ha enviado un correo de confirmación.' });
