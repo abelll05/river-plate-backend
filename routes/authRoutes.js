@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { register, login, verifyAccount, forgotPassword, resetPassword } = require('../controllers/authController');
+const authControllers = require('../controllers/authController');
 const { verifyToken } = require('../middlewares/authMiddleware');
 
 // Ruta para registrar un usuario
