@@ -43,11 +43,7 @@ router.post('/register', async (req, res) => {
     const verificationUrl = `${frontendUrl}/verify/${verificationToken}`;
 
     const subject = 'Verifica tu correo electrónico';
-    const text = `
-      Hola ${username},
-      Gracias por registrarte. Por favor verifica tu correo electrónico haciendo clic en el siguiente enlace:
-      <a href="${verificationUrl}">Verificar correo</a>
-    `;
+    const text = `Hola ${username}, Gracias por registrarte. Por favor verifica tu correo electrónico haciendo clic en el siguiente enlace: <a href="${verificationUrl}">Verificar correo</a>`;
     await sendMail(email, subject, text);
 
     res.status(201).json({
@@ -114,6 +110,73 @@ router.get('/verify/:token', async (req, res) => {
     res.redirect(`${frontendUrl}/verify-success`); // Redirige a una página de éxito en frontend
   } catch (error) {
     console.error('Error en /verify:', error.message);
+    res.status(500).json({ error: 'Error en el servidor' });
+  }
+});
+
+// Ruta para solicitar el restablecimiento de la contraseña
+router.post('/forgot-password', async (req, res) => {
+  const { email } = req.body;
+
+  if (!email) {
+    return res.status(400).json({ error: 'El correo electrónico es obligatorio' });
+  }
+
+  try {
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(404).json({ error: 'Usuario no encontrado' });
+    }
+
+    // Generar token único para restablecer la contraseña
+    const resetToken = crypto.randomBytes(32).toString('hex');
+    user.resetPasswordToken = resetToken;
+    user.resetPasswordTokenExpiration = Date.now() + 3600000; // 1 hora de validez
+    await user.save();
+
+    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
+    const resetUrl = `${frontendUrl}/reset-password/${resetToken}`;
+
+    const subject = 'Restablecimiento de contraseña';
+    const text = `
+      Hola ${user.username},
+      Has solicitado restablecer tu contraseña. Haz clic en el siguiente enlace para cambiarla:
+      <a href="${resetUrl}">Restablecer contraseña</a>
+    `;
+
+    await sendMail(email, subject, text);
+    res.status(200).json({ message: 'Enlace de restablecimiento enviado a tu correo.' });
+  } catch (error) {
+    console.error('Error en /forgot-password:', error.message);
+    res.status(500).json({ error: 'Error en el servidor' });
+  }
+});
+
+// Ruta para restablecer la contraseña
+router.post('/reset-password/:token', async (req, res) => {
+  const { token } = req.params;
+  const { newPassword } = req.body;
+
+  if (!newPassword) {
+    return res.status(400).json({ error: 'La nueva contraseña es obligatoria' });
+  }
+
+  try {
+    const user = await User.findOne({ resetPasswordToken: token, resetPasswordTokenExpiration: { $gt: Date.now() } });
+
+    if (!user) {
+      return res.status(400).json({ error: 'Token de restablecimiento inválido o expirado' });
+    }
+
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    user.password = hashedPassword;
+    user.resetPasswordToken = null;
+    user.resetPasswordTokenExpiration = null;
+    await user.save();
+
+    res.status(200).json({ message: 'Contraseña restablecida exitosamente' });
+  } catch (error) {
+    console.error('Error en /reset-password:', error.message);
     res.status(500).json({ error: 'Error en el servidor' });
   }
 });
