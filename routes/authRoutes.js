@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const authControllers = require('../controllers/authControllers');
+const authControllers = require('../controllers/authController');
 const { verifyToken } = require('../middlewares/authMiddlewares');
 
 // Ruta para registrar un usuario
