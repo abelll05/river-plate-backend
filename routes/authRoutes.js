@@ -41,8 +41,9 @@ router.post('/register', async (req, res) => {
     // Enviar el correo de verificación con enlace HTML
     const verificationUrl = `https://river-plate-frontend.onrender.com/verify/${newUser.verificationToken}`;
     const subject = 'Verifica tu cuenta de River Plate';
-    const text = `Hola ${newUser.username},\n\nPara verificar tu cuenta, haz clic en el siguiente enlace: ${verificationUrl}`;
+    const text = `Hola ${newUser.username},\n\nPara verificar tu cuenta, haz clic en el siguiente enlace: \n\n${verificationUrl}`;
 
+    // Aquí el cuerpo en HTML
     const html = `
       <p>Hola ${newUser.username},</p>
       <p>Para verificar tu cuenta, haz clic en el siguiente enlace:</p>
@@ -138,6 +139,7 @@ router.post('/forgot-password', async (req, res) => {
     const subject = 'Restablecer tu contraseña';
     const text = `Hola,\n\nPara restablecer tu contraseña, haz clic en el siguiente enlace: \n\n${resetUrl}`;
 
+    // Aquí el cuerpo en HTML
     const html = `
       <p>Hola,</p>
       <p>Para restablecer tu contraseña, haz clic en el siguiente enlace:</p>
