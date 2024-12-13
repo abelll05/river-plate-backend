@@ -1,63 +1,12 @@
 const express = require('express');
-const jwt = require('jsonwebtoken');
-const User = require('../models/User'); 
 const router = express.Router();
+const userControllers = require('../controllers/userControllers');
+const { verifyToken } = require('../middlewares/authMiddlewares');
 
-const authenticateToken = (req, res, next) => {
-  const token = req.header('Authorization')?.split(' ')[1];
-  if (!token) return res.status(401).json({ error: 'Acceso denegado. Token no proporcionado.' });
+// Ruta para obtener los detalles de un usuario (protegida)
+router.get('/profile', verifyToken, userControllers.getProfile);
 
-  try {
-    const verified = jwt.verify(token, process.env.JWT_SECRET);
-    req.user = verified;
-    next();
-  } catch (err) {
-    res.status(401).json({ error: 'Token inválido.' });
-  }
-};
-
-router.get('/profile', authenticateToken, async (req, res) => {
-  try {
-    const user = await User.findById(req.user.id).select('-password'); 
-    if (!user) {
-      return res.status(404).json({ error: 'Usuario no encontrado.' });
-    }
-    res.json(user);
-  } catch (error) {
-    console.error('Error al obtener perfil:', error.message);
-    res.status(500).json({ error: 'Error en el servidor.' });
-  }
-});
-
-router.put('/profile', authenticateToken, async (req, res) => {
-  const { username, email } = req.body;
-  try {
-    const updatedUser = await User.findByIdAndUpdate(
-      req.user.id,
-      { username, email },
-      { new: true, runValidators: true }
-    ).select('-password');
-    if (!updatedUser) {
-      return res.status(404).json({ error: 'Usuario no encontrado.' });
-    }
-    res.json(updatedUser);
-  } catch (error) {
-    console.error('Error al actualizar perfil:', error.message);
-    res.status(500).json({ error: 'Error en el servidor.' });
-  }
-});
-
-router.delete('/profile', authenticateToken, async (req, res) => {
-  try {
-    const deletedUser = await User.findByIdAndDelete(req.user.id);
-    if (!deletedUser) {
-      return res.status(404).json({ error: 'Usuario no encontrado.' });
-    }
-    res.json({ message: 'Cuenta eliminada con éxito.' });
-  } catch (error) {
-    console.error('Error al eliminar cuenta:', error.message);
-    res.status(500).json({ error: 'Error en el servidor.' });
-  }
-});
+// Ruta para actualizar los datos del usuario (protegida)
+router.put('/profile', verifyToken, userControllers.updateProfile);
 
 module.exports = router;
