@@ -1,7 +1,7 @@
 const express = require('express');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
-const crypto = require('crypto');
+const crypto = require('crypto'); // Para generar tokens únicos
 const User = require('../models/User');
 const sendMail = require('../utils/mailer');
 const router = express.Router();
@@ -26,28 +26,33 @@ router.post('/register', async (req, res) => {
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
+
+    // Generar token único para la verificación
     const verificationToken = crypto.randomBytes(32).toString('hex');
 
     const newUser = new User({
       username,
       email,
       password: hashedPassword,
-      verificationToken,
+      verificationToken, // Guardar token de verificación
     });
     await newUser.save();
 
-    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
+    // Usar la variable de entorno FRONTEND_URL para obtener la URL correcta
+    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000'; // Valor por defecto para desarrollo
     const verificationUrl = `${frontendUrl}/verify/${verificationToken}`;
+
     const subject = 'Verifica tu correo electrónico';
     const text = `
       Hola ${username},
-      Gracias por registrarte. Verifica tu correo electrónico haciendo clic en este enlace: 
-      ${verificationUrl}
+      Gracias por registrarte. Por favor verifica tu correo electrónico haciendo clic en el siguiente enlace:
+      <a href="${verificationUrl}">Verificar correo</a>
     `;
-
     await sendMail(email, subject, text);
 
-    res.status(201).json({ message: 'Usuario registrado exitosamente. Por favor verifica tu correo.' });
+    res.status(201).json({
+      message: 'Usuario registrado exitosamente. Por favor verifica tu correo.',
+    });
   } catch (error) {
     console.error('Error en /register:', error.message);
     res.status(500).json({ error: 'Error en el servidor' });
@@ -96,12 +101,14 @@ router.get('/verify/:token', async (req, res) => {
       return res.status(400).json({ error: 'Token de verificación inválido o expirado' });
     }
 
+    // Marcar como verificado y limpiar el token
     user.isVerified = true;
-    user.verificationToken = null;
+    user.verificationToken = null; // Limpiar el token de verificación
     await user.save();
 
+    // Redirigir al frontend para mostrar un mensaje de verificación exitosa
     const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
-    res.redirect(`${frontendUrl}/verify-success`);
+    res.redirect(`${frontendUrl}/verify-success`); // Redirige a una página de éxito en frontend
   } catch (error) {
     console.error('Error en /verify:', error.message);
     res.status(500).json({ error: 'Error en el servidor' });

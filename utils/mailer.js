@@ -1,26 +1,37 @@
+require('dotenv').config();
 const nodemailer = require('nodemailer');
 
+// Crear el transportador con las credenciales de Gmail
+const transporter = nodemailer.createTransport({
+  service: 'gmail',
+  auth: {
+    user: process.env.SMTP_USER,  // Tu correo de Gmail
+    pass: process.env.SMTP_PASSWORD,  // La contraseña o App Password de Gmail
+  },
+});
+
+// Función para enviar correos
 const sendMail = async (to, subject, text) => {
+  const mailOptions = {
+    from: process.env.SMTP_USER,  // De: tu correo
+    to,                         // Para: correo del destinatario
+    subject,                    // Asunto del correo
+    html: text,                  // Cambié 'text' a 'html' para enviar el correo como HTML
+  };
+
+  // Imprimir los detalles del correo para depuración
+  console.log('Enviando correo a:', to);
+  console.log('Asunto:', subject);
+  console.log('Texto del correo:', text);
+
   try {
-    const transporter = nodemailer.createTransport({
-      service: 'gmail',
-      auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS,
-      },
-    });
-
-    await transporter.sendMail({
-      from: process.env.EMAIL_USER,
-      to,
-      subject,
-      html: text,
-    });
-
-    console.log(`Correo enviado a ${to}`);
+    // Enviar el correo usando nodemailer
+    const info = await transporter.sendMail(mailOptions);
+    console.log('Correo enviado con éxito:', info);
+    return info;
   } catch (error) {
-    console.error('Error al enviar correo:', error.message);
-    throw new Error('No se pudo enviar el correo electrónico.');
+    console.error('Error al enviar el correo:', error.message);
+    throw new Error('Error al enviar el correo');
   }
 };
 
