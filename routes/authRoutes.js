@@ -135,15 +135,16 @@ router.post('/forgot-password', async (req, res) => {
     await user.save();
 
     // Enviar el enlace de restablecimiento por correo electrónico con HTML
-    const resetUrl = `https://river-plate-frontend.onrender.com/reset-password/${resetToken}`;
-    const subject = 'Restablecer tu contraseña';
-    const text = `Hola,\n\nPara restablecer tu contraseña, haz clic en el siguiente enlace: \n\n${resetUrl}`;
+    const verificationUrl = `https://river-plate-frontend.onrender.com/verify/${newUser.verificationToken}`;
+    const subject = 'Verifica tu cuenta de River Plate';
+    const text = `Hola ${newUser.username},\n\nPara verificar tu cuenta, haz clic en el siguiente enlace: \n\n${verificationUrl}`;
 
     // Aquí el cuerpo en HTML
     const html = `
-      <p>Hola,</p>
-      <p>Para restablecer tu contraseña, haz clic en el siguiente enlace:</p>
-      <a href="${resetUrl}" style="color: #1E90FF;">Restablecer contraseña</a>
+      <p>Hola ${newUser.username},</p>
+      <p>Para verificar tu cuenta, haz clic en el siguiente enlace:</p>
+      <p><a href="${verificationUrl}" style="color: #1E90FF; text-decoration: none;">Verificar cuenta</a></p>
+      <p>Si no fuiste tú quien solicitó este registro, ignora este correo.</p>
     `;
 
     await sendMail(email, subject, text, html); // Asumiendo que sendMail también maneja el HTML
