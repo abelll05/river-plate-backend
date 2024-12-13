@@ -33,12 +33,20 @@ router.post('/register', async (req, res) => {
       username,
       email,
       password: hashedPassword,
+      verificationToken: crypto.randomBytes(32).toString('hex'), // Generar un token de verificación
     });
 
     await newUser.save();
 
+    // Enviar el correo de verificación
+    const verificationUrl = `https://river-plate-frontend.onrender.com/verify/${newUser.verificationToken}`;
+    const subject = 'Verifica tu cuenta de River Plate';
+    const text = `Hola ${newUser.username},\n\nPara verificar tu cuenta, haz clic en el siguiente enlace: ${verificationUrl}`;
+
+    await sendMail(email, subject, text);
+
     // Responder al frontend
-    res.status(201).json({ message: 'Usuario registrado con éxito' });
+    res.status(201).json({ message: 'Usuario registrado con éxito. Por favor, verifica tu correo.' });
   } catch (error) {
     console.error('Error en el registro:', error.message);
     res.status(500).json({ error: 'Error al registrar el usuario' });
@@ -124,7 +132,7 @@ router.post('/forgot-password', async (req, res) => {
     const resetUrl = `${frontendUrl}/reset-password/${resetToken}`;
 
     const subject = 'Restablecer tu contraseña';
-    const text = `Hola, \n\nPara restablecer tu contraseña, haz clic en el siguiente enlace: \n\n${resetUrl}`;
+    const text = `Hola,\n\nPara restablecer tu contraseña, haz clic en el siguiente enlace: \n\n${resetUrl}`;
 
     await sendMail(email, subject, text);
 
