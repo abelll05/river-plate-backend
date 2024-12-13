@@ -38,12 +38,18 @@ router.post('/register', async (req, res) => {
 
     await newUser.save();
 
-    // Enviar el correo de verificación
+    // Enviar el correo de verificación con enlace HTML
     const verificationUrl = `https://river-plate-frontend.onrender.com/verify/${newUser.verificationToken}`;
     const subject = 'Verifica tu cuenta de River Plate';
     const text = `Hola ${newUser.username},\n\nPara verificar tu cuenta, haz clic en el siguiente enlace: ${verificationUrl}`;
 
-    await sendMail(email, subject, text);
+    const html = `
+      <p>Hola ${newUser.username},</p>
+      <p>Para verificar tu cuenta, haz clic en el siguiente enlace:</p>
+      <a href="${verificationUrl}" style="color: #1E90FF;">Verifica tu cuenta</a>
+    `;
+
+    await sendMail(email, subject, text, html); // Asumiendo que sendMail también maneja el HTML
 
     // Responder al frontend
     res.status(201).json({ message: 'Usuario registrado con éxito. Por favor, verifica tu correo.' });
@@ -127,14 +133,18 @@ router.post('/forgot-password', async (req, res) => {
     user.resetPasswordExpires = Date.now() + 3600000; // El token es válido por 1 hora
     await user.save();
 
-    // Enviar el enlace de restablecimiento por correo electrónico
-    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
-    const resetUrl = `${frontendUrl}/reset-password/${resetToken}`;
-
+    // Enviar el enlace de restablecimiento por correo electrónico con HTML
+    const resetUrl = `https://river-plate-frontend.onrender.com/reset-password/${resetToken}`;
     const subject = 'Restablecer tu contraseña';
     const text = `Hola,\n\nPara restablecer tu contraseña, haz clic en el siguiente enlace: \n\n${resetUrl}`;
 
-    await sendMail(email, subject, text);
+    const html = `
+      <p>Hola,</p>
+      <p>Para restablecer tu contraseña, haz clic en el siguiente enlace:</p>
+      <a href="${resetUrl}" style="color: #1E90FF;">Restablecer contraseña</a>
+    `;
+
+    await sendMail(email, subject, text, html); // Asumiendo que sendMail también maneja el HTML
 
     res.status(200).json({ message: 'Enlace de restablecimiento de contraseña enviado a tu correo' });
   } catch (error) {
