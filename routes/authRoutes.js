@@ -59,7 +59,7 @@ router.post('/register', async (req, res) => {
   }
 });
 
-// Ruta de login
+// Ruta de login (sin necesidad de verificación de correo)
 router.post('/login', async (req, res) => {
   const { email, password } = req.body;
 
@@ -73,15 +73,18 @@ router.post('/login', async (req, res) => {
       return res.status(404).json({ error: 'Usuario no encontrado' });
     }
 
-    if (!user.isVerified) {
-      return res.status(403).json({ error: 'Por favor verifica tu correo antes de iniciar sesión.' });
-    }
+    // Elimino la verificación de correo para permitir el login sin verificar
+    // if (!user.isVerified) {
+    //   return res.status(403).json({ error: 'Por favor verifica tu correo antes de iniciar sesión.' });
+    // }
 
+    // Verificar contraseña
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
       return res.status(400).json({ error: 'Contraseña incorrecta' });
     }
 
+    // Generar token JWT
     const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '1h' });
     res.status(200).json({ message: 'Login exitoso', token });
   } catch (error) {
