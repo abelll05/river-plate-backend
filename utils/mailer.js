@@ -1,38 +1,34 @@
-require('dotenv').config();
 const nodemailer = require('nodemailer');
 
-// Crear el transportador con las credenciales de Gmail
+// Crear el transportador con nodemailer
 const transporter = nodemailer.createTransport({
-  service: 'gmail',
+  service: 'gmail', // Cambia según tu proveedor de correo
   auth: {
-    user: process.env.SMTP_USER,  // Tu correo de Gmail
-    pass: process.env.SMTP_PASSWORD,  // La contraseña o App Password de Gmail
+    user: process.env.SMTP_USER, // Email definido en las variables de entorno
+    pass: process.env.SMTP_PASSWORD, // Contraseña o contraseña de aplicación
   },
 });
 
 // Función para enviar correos
-const sendMail = async (to, subject, text) => {
+const sendEmail = async (to, subject, text, html) => {
   const mailOptions = {
-    from: process.env.SMTP_USER,  // De: tu correo
-    to,                         // Para: correo del destinatario
-    subject,                    // Asunto del correo
-    html: text,                  // Cambié 'text' a 'html' para enviar el correo como HTML
+    from: process.env.EMAIL_USER, // Dirección del remitente
+    to, // Dirección del destinatario
+    subject, // Asunto del correo
+    text, // Texto plano (opcional)
+    html, // Cuerpo en HTML
   };
 
-  // Imprimir los detalles del correo para depuración
-  console.log('Enviando correo a:', to);
-  console.log('Asunto:', subject);
-  console.log('Texto del correo:', text);
-
   try {
-    // Enviar el correo usando nodemailer
+    // Enviar el correo
     const info = await transporter.sendMail(mailOptions);
-    console.log('Correo enviado con éxito:', info);
+    console.log('Correo enviado:', info.response);
     return info;
   } catch (error) {
-    console.error('Error al enviar el correo:', error.message);
-    throw new Error('Error al enviar el correo');
+    console.error('Error al enviar el correo:', error);
+    throw error;
   }
 };
 
-module.exports = sendMail;
+// Exportar la función para usarla en otros archivos
+module.exports = { sendEmail };
