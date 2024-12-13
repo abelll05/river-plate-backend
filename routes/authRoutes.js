@@ -40,6 +40,7 @@ router.post('/register', async (req, res) => {
 
     // Enviar el correo de verificación con enlace HTML
     const verificationUrl = `https://river-plate-frontend.onrender.com/verify/${newUser.verificationToken}`;
+    console.log('URL de verificación generada:', verificationUrl); // Log de la URL generada
     const subject = 'Verifica tu cuenta de River Plate';
     const text = `Hola ${newUser.username},\n\nPara verificar tu cuenta, haz clic en el siguiente enlace: \n\n${verificationUrl}`;
 
@@ -51,6 +52,7 @@ router.post('/register', async (req, res) => {
     `;
 
     await sendMail(email, subject, text, html); // Asumiendo que sendMail también maneja el HTML
+    console.log('Correo de verificación enviado a:', email); // Log del correo enviado
 
     // Responder al frontend
     res.status(201).json({ message: 'Usuario registrado con éxito. Por favor, verifica tu correo.' });
@@ -92,19 +94,21 @@ router.post('/login', async (req, res) => {
 // Ruta para verificar el correo electrónico
 router.get('/verify/:token', async (req, res) => {
   const { token } = req.params;
+  console.log('Token recibido en el backend:', token); // Confirmar que el token llegó
 
   try {
     const user = await User.findOne({ verificationToken: token });
-
     if (!user) {
+      console.log('Token inválido o expirado'); // Log en caso de error
       return res.status(400).json({ error: 'Token de verificación inválido o expirado' });
     }
 
     // Marcar como verificado y limpiar el token
     user.isVerified = true;
-    user.verificationToken = null; // Limpiar el token de verificación
+    user.verificationToken = null;
     await user.save();
 
+    console.log(`Usuario ${user.email} verificado con éxito`); // Confirmar que el usuario fue verificado
     res.status(200).json({ message: 'Cuenta verificada con éxito' });
   } catch (error) {
     console.error('Error en /verify:', error.message);
