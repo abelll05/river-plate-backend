@@ -1,92 +1,45 @@
 const express = require('express');
+const router = express.Router();
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
-const crypto = require('crypto'); // Para generar tokens únicos
 const User = require('../models/User');
-const sendMail = require('../utils/mailer');
-const router = express.Router();
+const { sendVerificationEmail } = require('../utils/mailer');
 
-// Ruta de registro con verificación de correo
+// Ruta para registrar usuarios
 router.post('/register', async (req, res) => {
-  const { username, email, password } = req.body;
-
-  if (!username || !email || !password) {
-    return res.status(400).json({ error: 'Todos los campos son obligatorios' });
-  }
+  const { name, email, password } = req.body;
 
   try {
-    const existingEmail = await User.findOne({ email });
-    if (existingEmail) {
-      return res.status(400).json({ error: 'El correo ya está registrado' });
+    // Verificar si el usuario ya existe
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+      return res.status(400).json({ error: 'El correo ya está registrado.' });
     }
 
-    const existingUsername = await User.findOne({ username });
-    if (existingUsername) {
-      return res.status(400).json({ error: 'El nombre de usuario ya está registrado' });
-    }
-
+    // Hashear la contraseña
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Generar token único para la verificación
-    const verificationToken = crypto.randomBytes(32).toString('hex');
+    // Crear un token de verificación
+    const verificationToken = jwt.sign({ email }, process.env.JWT_SECRET, { expiresIn: '1d' });
 
-    const newUser = new User({
-      username,
+    // Crear nuevo usuario
+    const user = new User({
+      name,
       email,
       password: hashedPassword,
-      verificationToken, // Guardar token de verificación
+      isVerified: false,
+      verificationToken,
     });
-    await newUser.save();
 
-    // Usar la variable de entorno FRONTEND_URL para obtener la URL correcta
-    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000'; // Valor por defecto para desarrollo
-    const verificationUrl = `${frontendUrl}/verify/${verificationToken}`;
+    await user.save();
 
-    const subject = 'Verifica tu correo electrónico';
-    const text = `
-      Hola ${username},
-      Gracias por registrarte. Por favor verifica tu correo electrónico haciendo clic en el siguiente enlace:
-      <a href="${verificationUrl}">Verificar correo</a>
-    `;
-    await sendMail(email, subject, text);
+    // Enviar correo de verificación
+    await sendVerificationEmail(email, verificationToken);
 
-    res.status(201).json({
-      message: 'Usuario registrado exitosamente. Por favor verifica tu correo.',
-    });
+    res.status(201).json({ message: 'Usuario registrado. Por favor verifica tu correo.' });
   } catch (error) {
-    console.error('Error en /register:', error.message);
-    res.status(500).json({ error: 'Error en el servidor' });
-  }
-});
-
-// Ruta de login
-router.post('/login', async (req, res) => {
-  const { email, password } = req.body;
-
-  if (!email || !password) {
-    return res.status(400).json({ error: 'Todos los campos son obligatorios' });
-  }
-
-  try {
-    const user = await User.findOne({ email });
-    if (!user) {
-      return res.status(404).json({ error: 'Usuario no encontrado' });
-    }
-
-    if (!user.isVerified) {
-      return res.status(403).json({ error: 'Por favor verifica tu correo antes de iniciar sesión.' });
-    }
-
-    const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) {
-      return res.status(400).json({ error: 'Contraseña incorrecta' });
-    }
-
-    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '1h' });
-    res.status(200).json({ message: 'Login exitoso', token });
-  } catch (error) {
-    console.error('Error en /login:', error.message);
-    res.status(500).json({ error: 'Error en el servidor' });
+    console.error('Error al registrar usuario:', error);
+    res.status(500).json({ error: 'Error en el servidor.' });
   }
 });
 
@@ -95,23 +48,93 @@ router.get('/verify/:token', async (req, res) => {
   const { token } = req.params;
 
   try {
-    const user = await User.findOne({ verificationToken: token });
+    // Verificar el token
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+    // Buscar al usuario con el token de verificación
+    const user = await User.findOne({ email: decoded.email, verificationToken: token });
 
     if (!user) {
-      return res.status(400).json({ error: 'Token de verificación inválido o expirado' });
+      return res.status(400).json({ error: 'Token de verificación inválido o expirado.' });
     }
 
-    // Marcar como verificado y limpiar el token
+    // Marcar al usuario como verificado
     user.isVerified = true;
-    user.verificationToken = null; // Limpiar el token de verificación
+    user.verificationToken = null; // Eliminar el token de verificación
     await user.save();
 
-    // Redirigir al frontend para mostrar un mensaje de verificación exitosa
+    // Redirigir a la página de éxito en el frontend
     const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
-    res.redirect(`${frontendUrl}/verify-success`); // Redirige a una página de éxito en frontend
+    res.redirect(`${frontendUrl}/verify-success`);
   } catch (error) {
-    console.error('Error en /verify:', error.message);
-    res.status(500).json({ error: 'Error en el servidor' });
+    console.error('Error al verificar el correo:', error);
+    res.status(500).json({ error: 'Error en el servidor.' });
+  }
+});
+
+// Ruta para iniciar sesión
+router.post('/login', async (req, res) => {
+  const { email, password } = req.body;
+
+  try {
+    // Buscar al usuario
+    const user = await User.findOne({ email });
+
+    if (!user) {
+      return res.status(400).json({ error: 'Correo o contraseña incorrectos.' });
+    }
+
+    // Verificar si el usuario está verificado
+    if (!user.isVerified) {
+      return res.status(400).json({ error: 'Por favor verifica tu correo antes de iniciar sesión.' });
+    }
+
+    // Verificar la contraseña
+    const isMatch = await bcrypt.compare(password, user.password);
+
+    if (!isMatch) {
+      return res.status(400).json({ error: 'Correo o contraseña incorrectos.' });
+    }
+
+    // Generar un token de autenticación
+    const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, { expiresIn: '1h' });
+
+    res.status(200).json({ message: 'Inicio de sesión exitoso.', token });
+  } catch (error) {
+    console.error('Error al iniciar sesión:', error);
+    res.status(500).json({ error: 'Error en el servidor.' });
+  }
+});
+
+// Ruta para reenvío de correo de verificación (opcional)
+router.post('/resend-verification', async (req, res) => {
+  const { email } = req.body;
+
+  try {
+    // Buscar al usuario
+    const user = await User.findOne({ email });
+
+    if (!user) {
+      return res.status(400).json({ error: 'Usuario no encontrado.' });
+    }
+
+    if (user.isVerified) {
+      return res.status(400).json({ error: 'El usuario ya está verificado.' });
+    }
+
+    // Generar un nuevo token de verificación
+    const verificationToken = jwt.sign({ email }, process.env.JWT_SECRET, { expiresIn: '1d' });
+
+    user.verificationToken = verificationToken;
+    await user.save();
+
+    // Enviar correo de verificación
+    await sendVerificationEmail(email, verificationToken);
+
+    res.status(200).json({ message: 'Correo de verificación reenviado.' });
+  } catch (error) {
+    console.error('Error al reenviar correo de verificación:', error);
+    res.status(500).json({ error: 'Error en el servidor.' });
   }
 });
 
