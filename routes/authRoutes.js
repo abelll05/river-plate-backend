@@ -105,9 +105,7 @@ router.get('/verify/:token', async (req, res) => {
     user.verificationToken = null; // Limpiar el token de verificación
     await user.save();
 
-    // Redirigir al frontend para mostrar un mensaje de verificación exitosa
-    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
-    res.redirect(`${frontendUrl}/verify-success`);
+    res.status(200).json({ message: 'Cuenta verificada con éxito' });
   } catch (error) {
     console.error('Error en /verify:', error.message);
     res.status(500).json({ error: 'Error en el servidor' });
