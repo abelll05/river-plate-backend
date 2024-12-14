@@ -10,7 +10,6 @@ const PORT = process.env.PORT || 5000;
 
 app.use(express.json()); 
 
-// Configuración de CORS
 const allowedOrigins = [
   'http://localhost:3000', 
   'https://river-plate-frontend.onrender.com', 
@@ -22,7 +21,6 @@ app.use(
   })
 );
 
-// Conexión a MongoDB
 mongoose
   .connect(process.env.MONGO_URI, {
     useNewUrlParser: true,
@@ -34,29 +32,14 @@ mongoose
     process.exit(1);
   });
 
-// Rutas de la API
-app.use('/api/auth', authRoutes);
+app.use('/api', authRoutes);
 
-// Servir archivos estáticos de React
 app.use(express.static(path.join(__dirname, 'build')));
 
-// Middleware de manejo de errores
-app.use((err, req, res, next) => {
-  console.error('Error del servidor:', err);
-  res.status(500).json({ error: 'Error del servidor' });
-});
-
-// Fallback para React
 app.get('*', (req, res) => {
-  res.sendFile(path.resolve(__dirname, 'build', 'index.html'), (err) => {
-    if (err) {
-      console.error('Error al servir index.html:', err);
-      res.status(500).send('Error al cargar la aplicación');
-    }
-  });
+  res.sendFile(path.join(__dirname, 'build', 'index.html'));
 });
 
-// Iniciar el servidor
 app.listen(PORT, () => {
   console.log(`Servidor escuchando en el puerto ${PORT}`);
 });
