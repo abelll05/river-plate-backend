@@ -90,24 +90,25 @@ router.post('/login', async (req, res) => {
 // Ruta para verificar el correo electrónico
 router.get('/verify/:token', async (req, res) => {
   const { token } = req.params;
-  console.log('Token recibido en el backend:', token);
+  console.log('Token recibido en el backend:', token); // Confirmar que el token llegó
 
   try {
     const user = await User.findOne({ verificationToken: token });
     if (!user) {
-      console.log('Token inválido o expirado');
+      console.log('Token inválido o expirado'); // Log en caso de error
       return res.status(400).json({ error: 'Token de verificación inválido o expirado' });
     }
 
+    // Marcar como verificado y limpiar el token
     user.isVerified = true;
     user.verificationToken = null;
     await user.save();
 
-    console.log(`Usuario ${user.email} verificado con éxito`);
-    res.status(200).json({ message: 'Cuenta verificada con éxito' });
+    console.log(`Usuario ${user.email} verificado con éxito`); // Confirmar que el usuario fue verificado
+    res.status(200).json({ message: 'Cuenta verificada con éxito' }); // SOLO JSON
   } catch (error) {
     console.error('Error en /verify:', error.message);
-    res.status(500).json({ error: 'Error en el servidor' });
+    res.status(500).json({ error: 'Error en el servidor' }); // SOLO JSON
   }
 });
 
