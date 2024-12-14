@@ -78,9 +78,7 @@ router.post('/login', async (req, res) => {
 
     // Verificar si el usuario está verificado
     if (!user.isVerified) {
-      return res.status(403).json({
-        error: 'Tu cuenta no está verificada. Por favor, revisa tu correo para verificar tu cuenta.',
-      });
+      return res.status(403).json({ error: 'Por favor verifica tu correo antes de iniciar sesión.' });
     }
 
     // Verificar contraseña
