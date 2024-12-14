@@ -39,7 +39,7 @@ router.post('/register', async (req, res) => {
     await newUser.save();
 
     // Enviar el correo de verificación con enlace HTML
-    const verificationUrl = ` https://river-plate-backend.onrender.com/verify/${newUser.verificationToken}`;
+    const verificationUrl = ` https://river-plate-backend.onrender.com/auth/verify/${newUser.verificationToken}`;
     console.log('URL de verificación generada:', verificationUrl); // Log de la URL generada
     const subject = 'Verifica tu cuenta de River Plate';
     const text = `Hola ${newUser.username},\n\nPara verificar tu cuenta, haz clic en el siguiente enlace: \n\n${verificationUrl}`;
