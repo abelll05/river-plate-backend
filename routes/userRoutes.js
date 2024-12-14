@@ -47,6 +47,7 @@ router.put('/profile', authenticateToken, async (req, res) => {
   }
 });
 
+
 router.delete('/profile', authenticateToken, async (req, res) => {
   try {
     const deletedUser = await User.findByIdAndDelete(req.user.id);
