@@ -39,7 +39,7 @@ router.post('/register', async (req, res) => {
     await newUser.save();
 
     // Enviar el correo de verificación con enlace HTML
-    const verificationUrl = ` https://river-plate-backend.onrender.com/auth/verify/${newUser.verificationToken}`;
+    const verificationUrl = `https://river-plate-backend.onrender.com/auth/verify/${newUser.verificationToken}`;
     console.log('URL de verificación generada:', verificationUrl); // Log de la URL generada
     const subject = 'Verifica tu cuenta de River Plate';
     const text = `Hola ${newUser.username},\n\nPara verificar tu cuenta, haz clic en el siguiente enlace: \n\n${verificationUrl}`;
@@ -76,13 +76,18 @@ router.post('/login', async (req, res) => {
       return res.status(404).json({ error: 'Usuario no encontrado' });
     }
 
+    // Verificar si el usuario está verificado
+    if (!user.isVerified) {
+      return res.status(403).json({
+        error: 'Tu cuenta no está verificada. Por favor, revisa tu correo para verificar tu cuenta.',
+      });
+    }
+
     // Verificar contraseña
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
       return res.status(400).json({ error: 'Contraseña incorrecta' });
     }
-
-    
 
     // Generar un token JWT
     const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '1h' });
