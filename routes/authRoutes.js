@@ -19,36 +19,42 @@ router.post('/register', async (req, res) => {
   }
 
   try {
+    // Verificar si el email ya está registrado
     const existingUser = await User.findOne({ email });
     if (existingUser) {
       return res.status(400).json({ error: 'El correo electrónico ya está registrado' });
     }
 
+    // Hashear la contraseña
     const hashedPassword = await bcrypt.hash(password, 10);
 
+    // Crear un nuevo usuario
     const newUser = new User({
       username,
       email,
       password: hashedPassword,
-      verificationToken: crypto.randomBytes(32).toString('hex'),
+      verificationToken: crypto.randomBytes(32).toString('hex'), // Generar un token de verificación
     });
 
     await newUser.save();
 
-    const verificationUrl = `https://river-plate-backend.onrender.com/auth/verify/${newUser.verificationToken}`;
-    console.log('URL de verificación generada:', verificationUrl);
-
+    // Enviar el correo de verificación con enlace HTML
+    const verificationUrl = ` https://river-plate-backend.onrender.com/auth/verify/${newUser.verificationToken}`;
+    console.log('URL de verificación generada:', verificationUrl); // Log de la URL generada
     const subject = 'Verifica tu cuenta de River Plate';
     const text = `Hola ${newUser.username},\n\nPara verificar tu cuenta, haz clic en el siguiente enlace: \n\n${verificationUrl}`;
+
+    // Aquí el cuerpo en HTML
     const html = `
       <p>Hola ${newUser.username},</p>
       <p>Para verificar tu cuenta, haz clic en el siguiente enlace:</p>
       <a href="${verificationUrl}" style="color: #1E90FF;">Verifica tu cuenta</a>
     `;
 
-    await sendMail(email, subject, text, html);
-    console.log('Correo de verificación enviado a:', email);
+    await sendMail(email, subject, text, html); // Asumiendo que sendMail también maneja el HTML
+    console.log('Correo de verificación enviado a:', email); // Log del correo enviado
 
+    // Responder al frontend
     res.status(201).json({ message: 'Usuario registrado con éxito. Por favor, verifica tu correo.' });
   } catch (error) {
     console.error('Error en el registro:', error.message);
@@ -70,15 +76,15 @@ router.post('/login', async (req, res) => {
       return res.status(404).json({ error: 'Usuario no encontrado' });
     }
 
-    if (!user.isVerified) {
-      return res.status(403).json({ error: 'Por favor verifica tu correo antes de iniciar sesión.' });
-    }
-
+    // Verificar contraseña
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
       return res.status(400).json({ error: 'Contraseña incorrecta' });
     }
 
+    
+
+    // Generar un token JWT
     const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '1h' });
     res.status(200).json({ message: 'Login exitoso', token });
   } catch (error) {
@@ -105,10 +111,10 @@ router.get('/verify/:token', async (req, res) => {
     await user.save();
 
     console.log(`Usuario ${user.email} verificado con éxito`); // Confirmar que el usuario fue verificado
-    res.status(200).json({ message: 'Cuenta verificada con éxito' }); // SOLO JSON
+    res.status(200).json({ message: 'Cuenta verificada con éxito' });
   } catch (error) {
     console.error('Error en /verify:', error.message);
-    res.status(500).json({ error: 'Error en el servidor' }); // SOLO JSON
+    res.status(500).json({ error: 'Error en el servidor' });
   }
 });
 
