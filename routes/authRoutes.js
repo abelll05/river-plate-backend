@@ -1,3 +1,4 @@
+// authRoutes.js
 const express = require('express');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
@@ -22,7 +23,7 @@ router.post('/register', async (req, res) => {
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
-    const verificationToken = crypto.randomBytes(4).toString('hex'); // Generar código de 4 dígitos
+    const verificationToken = crypto.randomInt(1000, 9999).toString(); // Código de 4 dígitos
 
     const newUser = new User({
       username,
@@ -40,7 +41,10 @@ router.post('/register', async (req, res) => {
     await sendMail(email, subject, text, html);
     console.log('Correo de verificación enviado a:', email);
 
-    res.status(201).json({ message: 'Usuario registrado con éxito. Por favor, verifica tu correo.' });
+    res.status(201).json({
+      message: 'Usuario registrado con éxito. Por favor, verifica tu correo.',
+      email,
+    });
   } catch (error) {
     console.error('Error en el registro:', error.message);
     res.status(500).json({ error: 'Error al registrar el usuario' });
