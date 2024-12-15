@@ -19,11 +19,11 @@ const UserSchema = new mongoose.Schema({
   },
   isVerified: {
     type: Boolean,
-    default: false, // Por defecto, el usuario no está verificado
+    default: false,
   },
   verificationToken: {
     type: String,
-    default: null, // Almacena el token temporalmente
+    default: null,
   },
 });
 
