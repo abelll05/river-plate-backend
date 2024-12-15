@@ -104,6 +104,10 @@ router.get('/verify/:token', async (req, res) => {
       return res.status(400).json({ error: 'Token de verificación inválido o expirado' });
     }
 
+    if (user.isVerified) {
+      return res.status(400).json({ message: 'El usuario ya está verificado.' });
+    }
+
     // Marcar como verificado y limpiar el token
     user.isVerified = true;
     user.verificationToken = null;
