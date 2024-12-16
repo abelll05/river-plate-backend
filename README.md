@@ -12,4 +12,8 @@ Además, incluye la funcionalidad de registro y login de usuarios con autenticac
 - `dotenv`: Permite cargar variables de entorno desde un archivo `.env`.
 - `jsonwebtoken`: Para la creación y verificación de tokens JWT en la autenticación de usuarios.
 - `bcrypt`: Librería para encriptar contraseñas y mejorar la seguridad de la autenticación.
+- `bcryptjs`: Otra variante de bcrypt para encriptación de contraseñas.
 - `nodemailer`: Librería para enviar correos electrónicos de confirmación a los usuarios tras el registro.
+- `express-validator`: Conjunto de middleware para validar y sanitizar entradas de datos en las rutas de Express.
+- `morgan`: Middleware para registrar solicitudes HTTP en la consola, útil para la depuración.
+- `nodemon`: Herramienta para reiniciar automáticamente el servidor de Node.js durante el desarrollo, facilitando las pruebas.
