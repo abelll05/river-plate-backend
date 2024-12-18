@@ -23,8 +23,8 @@ app.use(
 
 mongoose
   .connect(process.env.MONGO_URI, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
+    socketTimeoutMS: 45000, // Tiempo máximo para operaciones en el socket
+    connectTimeoutMS: 10000, // Tiempo máximo para conectar
   })
   .then(() => console.log('Conexión a MongoDB exitosa'))
   .catch((err) => {
