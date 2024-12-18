@@ -5,6 +5,8 @@ Este es el backend de la aplicación de gestión de River Plate, desarrollada co
 
 Además, incluye la funcionalidad de registro y login de usuarios con autenticación mediante JWT (JSON Web Tokens) y el envío de correos electrónicos de confirmación al registrarse.
 
+Aclaracion, cuando te logeas o registras en el fronted deplegado por render, generalmente lo hace rapido pero hay veces que relentiza el servidor por 30 segundos aproximandente.
+
 ## Librerías Usadas
 - `express`: Framework minimalista para Node.js que facilita la creación de servidores.
 - `mongoose`: Librería para interactuar con MongoDB a través de modelos y esquemas.
