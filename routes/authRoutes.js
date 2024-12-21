@@ -1,4 +1,3 @@
-// authRoutes.js
 const express = require('express');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
@@ -8,7 +7,6 @@ const sendMail = require('../utils/mailer');
 
 const router = express.Router();
 
-// Ruta de registro de usuario
 router.post('/register', async (req, res) => {
   const { username, email, password } = req.body;
 
@@ -23,7 +21,7 @@ router.post('/register', async (req, res) => {
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
-    const verificationToken = crypto.randomInt(1000, 9999).toString(); // Código de 4 dígitos
+    const verificationToken = crypto.randomInt(1000, 9999).toString(); 
 
     const newUser = new User({
       username,
@@ -51,7 +49,6 @@ router.post('/register', async (req, res) => {
   }
 });
 
-// Ruta de inicio de sesión
 router.post('/login', async (req, res) => {
   const { email, password } = req.body;
 
@@ -82,7 +79,6 @@ router.post('/login', async (req, res) => {
   }
 });
 
-// Ruta para verificar el código de verificación
 router.post('/verify-code', async (req, res) => {
   const { email, code } = req.body;
 

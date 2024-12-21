@@ -1,23 +1,21 @@
 require('dotenv').config();
 const nodemailer = require('nodemailer');
 
-// Configuración del transportador
 const transporter = nodemailer.createTransport({
-  service: 'gmail', // Servicio de correo (puedes cambiarlo según tu SMTP)
+  service: 'gmail', 
   auth: {
-    user: process.env.SMTP_USER, // Tu correo electrónico
-    pass: process.env.SMTP_PASSWORD, // Tu contraseña o contraseña de aplicación
+    user: process.env.SMTP_USER, 
+    pass: process.env.SMTP_PASSWORD, 
   },
 });
 
-// Función para enviar correos
 const sendMail = async (to, subject, text, html) => {
   const mailOptions = {
-    from: process.env.SMTP_USER, // Remitente
-    to, // Destinatario
-    subject, // Asunto
-    text, // Cuerpo de texto plano
-    html, // Cuerpo HTML
+    from: process.env.SMTP_USER, 
+    to, 
+    subject, 
+    text, 
+    html, 
   };
 
   try {

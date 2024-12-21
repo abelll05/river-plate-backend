@@ -2,7 +2,6 @@ const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 const transporter = require("../utils/emailServices");
 
-// Función para enviar el correo de confirmación
 const enviarCorreoConfirmacion = async (email, nombre, token) => {
   const verificationUrl = `${process.env.FRONTEND_URL || 'http://localhost:3000'}/verify/${token}`;
 
